@@ -1,0 +1,33 @@
+# Jaeger 외부 접근 Gateway
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: jaeger-gateway
+  namespace: observability
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http-jaeger
+        protocol: HTTP
+      hosts:
+        - "jaeger.local"
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: jaeger-vs
+  namespace: observability
+spec:
+  hosts:
+    - "jaeger.local"
+  gateways:
+    - jaeger-gateway
+  http:
+    - route:
+        - destination:
+            host: jaeger
+            port:
+              number: 16686

@@ -1,0 +1,8 @@
+CLAUDE.md
+.venv
+.claude
+.vscode
+output/
+plan.md
+writing_style_guideline.md
+docs/flow.md

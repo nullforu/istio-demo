@@ -1,0 +1,27 @@
+# Telemetry configuration for tracing and metrics
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: mesh-default
+  namespace: istio-system
+spec:
+  tracing:
+    - providers:
+        - name: jaeger
+      randomSamplingPercentage: 100.0
+  metrics:
+    - providers:
+        - name: prometheus
+      overrides:
+        - match:
+            metric: REQUEST_COUNT
+          tagOverrides:
+            request_path:
+              operation: UPSERT
+              value: request.url_path
+        - match:
+            metric: REQUEST_DURATION
+          tagOverrides:
+            request_path:
+              operation: UPSERT
+              value: request.url_path

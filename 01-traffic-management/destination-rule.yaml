@@ -1,0 +1,20 @@
+# DestinationRule - 서비스 버전(subset) 정의
+# 
+# 설명:
+#   - DestinationRule은 VirtualService의 라우팅 대상(subset)을 정의합니다.
+#   - 각 subset은 label selector로 특정 버전의 Pod를 선택합니다.
+#
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: backend-destination
+  namespace: istio-demo
+spec:
+  host: backend
+  subsets:
+    - name: v1
+      labels:
+        version: v1
+    - name: v2
+      labels:
+        version: v2

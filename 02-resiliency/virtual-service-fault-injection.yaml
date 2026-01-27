@@ -1,0 +1,28 @@
+# VirtualService - Fault Injection (장애 주입)
+#
+# 설명:
+#   - 50% 요청에 2초 지연 주입
+#   - 10% 요청에 500 에러 주입
+#   - 카오스 엔지니어링으로 시스템 복원력 테스트
+#
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: httpbin-fault
+  namespace: istio-demo
+spec:
+  hosts:
+    - httpbin
+  http:
+    - fault:
+        delay:
+          percentage:
+            value: 50
+          fixedDelay: 2s
+        abort:
+          percentage:
+            value: 10
+          httpStatus: 500
+      route:
+        - destination:
+            host: httpbin

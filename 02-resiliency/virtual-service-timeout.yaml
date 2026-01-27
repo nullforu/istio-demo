@@ -1,0 +1,19 @@
+# VirtualService - Timeout 설정
+#
+# 설명:
+#   - 2초 내에 응답이 없으면 504 Gateway Timeout 반환
+#   - 느린 서비스로 인한 연쇄 장애 방지
+#
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: httpbin-timeout
+  namespace: istio-demo
+spec:
+  hosts:
+    - httpbin
+  http:
+    - timeout: 2s
+      route:
+        - destination:
+            host: httpbin

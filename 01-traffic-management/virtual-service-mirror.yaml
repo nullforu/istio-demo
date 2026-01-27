@@ -1,0 +1,30 @@
+# VirtualService - 트래픽 미러링
+#
+# 설명:
+#   - 모든 트래픽을 v1으로 보내고, v2로 복제(미러링)
+#   - v2의 응답은 클라이언트에게 전달되지 않음
+#   - 프로덕션 트래픽으로 새 버전 테스트 가능
+#
+# 사용 사례:
+#   - Shadow 테스트
+#   - 성능 비교
+#   - 프로덕션 데이터로 검증
+#
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: backend-vs
+  namespace: istio-demo
+spec:
+  hosts:
+    - backend
+  http:
+    - route:
+        - destination:
+            host: backend
+            subset: v1
+      mirror:
+        host: backend
+        subset: v2
+      mirrorPercentage:
+        value: 100.0

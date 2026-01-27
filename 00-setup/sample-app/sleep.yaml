@@ -1,0 +1,34 @@
+# Sleep - Client for testing
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sleep
+  namespace: istio-demo
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sleep
+  namespace: istio-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sleep
+  template:
+    metadata:
+      labels:
+        app: sleep
+    spec:
+      serviceAccountName: sleep
+      containers:
+        - name: sleep
+          image: curlimages/curl
+          command: ["/bin/sleep", "infinity"]
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi

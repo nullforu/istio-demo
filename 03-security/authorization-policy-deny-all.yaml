@@ -1,0 +1,18 @@
+# AuthorizationPolicy - 모든 트래픽 차단
+#
+# 설명:
+#   - httpbin에 대한 모든 요청 차단
+#   - RBAC: access denied (403) 반환
+#
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: deny-all
+  namespace: istio-demo
+spec:
+  selector:
+    matchLabels:
+      app: httpbin
+  action: DENY
+  rules:
+    - {}

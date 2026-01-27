@@ -1,0 +1,23 @@
+# VirtualService - Retry 설정
+#
+# 설명:
+#   - 5xx 에러 시 최대 3회 재시도
+#   - 각 시도당 1초 타임아웃
+#   - 일시적 오류 자동 복구
+#
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: httpbin-retry
+  namespace: istio-demo
+spec:
+  hosts:
+    - httpbin
+  http:
+    - retries:
+        attempts: 3
+        perTryTimeout: 1s
+        retryOn: 5xx
+      route:
+        - destination:
+            host: httpbin

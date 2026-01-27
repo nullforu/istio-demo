@@ -1,0 +1,29 @@
+# HTTPRoute - 헤더 기반 라우팅
+#
+# 설명:
+#   - x-version: v2 헤더가 있으면 v2로 라우팅
+#   - 나머지는 v1으로 라우팅
+#
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: backend-header-route
+  namespace: istio-demo
+spec:
+  parentRefs:
+    - name: demo-gateway
+  hostnames:
+    - "backend-header.local"
+  rules:
+    # 헤더 매칭 (→ v2)
+    - matches:
+        - headers:
+            - name: x-version
+              value: v2
+      backendRefs:
+        - name: backend-v2
+          port: 8080
+    # 기본 (→ v1)
+    - backendRefs:
+        - name: backend-v1
+          port: 8080

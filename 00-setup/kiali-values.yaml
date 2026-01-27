@@ -1,0 +1,35 @@
+# Kiali Server Helm Values
+# Chart: kiali/kiali-server
+# Version: 2.20.0
+
+# 인증 비활성화 (데모용)
+auth:
+  strategy: "anonymous"
+
+# 외부 서비스 연동
+external_services:
+  prometheus:
+    url: "http://prometheus-kube-prometheus-prometheus.monitoring:9090"
+  
+  tracing:
+    enabled: true
+    in_cluster_url: "http://jaeger.observability:16686"
+    use_grpc: false
+  
+  grafana:
+    enabled: true
+    in_cluster_url: "http://prometheus-grafana.monitoring:80"
+
+# 서버 설정
+server:
+  web_root: "/"
+
+# 배포 설정
+deployment:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi

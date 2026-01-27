@@ -1,0 +1,33 @@
+# Kiali 외부 접근 Gateway
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: kiali-gateway
+  namespace: observability
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http-kiali
+        protocol: HTTP
+      hosts:
+        - "kiali.local"
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: kiali-vs
+  namespace: observability
+spec:
+  hosts:
+    - "kiali.local"
+  gateways:
+    - kiali-gateway
+  http:
+    - route:
+        - destination:
+            host: kiali
+            port:
+              number: 20001

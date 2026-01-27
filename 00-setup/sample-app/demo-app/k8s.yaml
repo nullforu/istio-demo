@@ -1,0 +1,178 @@
+# Demo App with OpenTelemetry Instrumentation
+# ===========================================
+# 이 앱은 다음 instrumentation을 보여줍니다:
+# - Flask 자동 instrumentation
+# - Requests (HTTP client) 자동 instrumentation
+# - Redis 자동 instrumentation
+# - MongoDB 자동 instrumentation (pymongo)
+# - 커스텀 span 생성
+#
+# Note: 이미지 빌드 필요 - ./build-and-load.sh 실행
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: demo-app
+  namespace: istio-demo
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-app
+  namespace: istio-demo
+  labels:
+    app: demo-app
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demo-app
+  template:
+    metadata:
+      labels:
+        app: demo-app
+        version: v1
+    spec:
+      serviceAccountName: demo-app
+      containers:
+        - name: demo-app
+          image: demo-app:latest
+          imagePullPolicy: Never  # Kind에서 로컬 이미지 사용
+          ports:
+            - containerPort: 8080
+          env:
+            - name: OTEL_SERVICE_NAME
+              value: "demo-app"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "jaeger.observability.svc.cluster.local:4317"
+            - name: HTTPBIN_URL
+              value: "http://httpbin.istio-demo.svc.cluster.local:8000"
+            - name: REDIS_HOST
+              value: "redis.istio-demo.svc.cluster.local"
+            - name: REDIS_PORT
+              value: "6379"
+            # MongoDB 환경변수 - MONGODB_* 대신 MONGO_* 사용
+            # (K8s가 Service 이름으로 MONGODB_PORT=tcp://... 자동 설정하여 충돌 방지)
+            - name: MONGO_HOST
+              value: "mongodb.istio-demo.svc.cluster.local"
+            - name: MONGO_PORT_NUM
+              value: "27017"
+            - name: MONGO_DB
+              value: "demo"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-app
+  namespace: istio-demo
+  labels:
+    app: demo-app
+spec:
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: demo-app
+---
+# Redis (Optional - for Redis instrumentation demo)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: istio-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          ports:
+            - containerPort: 6379
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: istio-demo
+spec:
+  ports:
+    - port: 6379
+      targetPort: 6379
+  selector:
+    app: redis
+---
+# MongoDB (for MongoDB instrumentation demo)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+  namespace: istio-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+        - name: mongodb
+          image: mongo:7
+          ports:
+            - containerPort: 27017
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 200m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+  namespace: istio-demo
+spec:
+  ports:
+    - port: 27017
+      targetPort: 27017
+  selector:
+    app: mongodb

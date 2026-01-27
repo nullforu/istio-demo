@@ -1,0 +1,27 @@
+# DestinationRule - Circuit Breaker 설정
+#
+# 설명:
+#   - maxConnections: 동시 연결 수 제한
+#   - http1MaxPendingRequests: 대기 요청 수 제한
+#   - 초과 요청은 즉시 503 반환 → 장애 격리
+#   - outlierDetection: 연속 5xx 에러 시 Pod 제외
+#
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: httpbin-circuit-breaker
+  namespace: istio-demo
+spec:
+  host: httpbin
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 1
+      http:
+        http1MaxPendingRequests: 1
+        maxRequestsPerConnection: 1
+    outlierDetection:
+      consecutive5xxErrors: 3
+      interval: 10s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 100

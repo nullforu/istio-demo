@@ -1,0 +1,33 @@
+# Grafana 외부 접근 Gateway
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: grafana-gateway
+  namespace: monitoring
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http-grafana
+        protocol: HTTP
+      hosts:
+        - "grafana.local"
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: grafana-vs
+  namespace: monitoring
+spec:
+  hosts:
+    - "grafana.local"
+  gateways:
+    - grafana-gateway
+  http:
+    - route:
+        - destination:
+            host: prometheus-grafana
+            port:
+              number: 80

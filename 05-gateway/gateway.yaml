@@ -1,0 +1,21 @@
+# Kubernetes Gateway API - Gateway 리소스
+#
+# 설명:
+#   - 외부 트래픽의 진입점 정의
+#   - gatewayClassName: istio → Istio가 이 Gateway 관리
+#   - listeners: 수신할 포트와 프로토콜
+#
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: demo-gateway
+  namespace: istio-demo
+spec:
+  gatewayClassName: istio
+  listeners:
+    - name: http
+      port: 80
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: Same

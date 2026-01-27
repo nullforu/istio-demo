@@ -1,0 +1,30 @@
+# VirtualService - Canary 배포 (가중치 기반 라우팅)
+#
+# 설명:
+#   - 90%의 트래픽은 v1으로, 10%는 v2로 라우팅
+#   - 새 버전을 소수의 사용자에게만 노출하여 안전하게 테스트
+#   - weight 값을 조정하여 점진적으로 v2 비율 증가 가능
+#
+# 사용 사례:
+#   - Canary 배포
+#   - A/B 테스트
+#   - 점진적 롤아웃
+#
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: backend-vs
+  namespace: istio-demo
+spec:
+  hosts:
+    - backend
+  http:
+    - route:
+        - destination:
+            host: backend
+            subset: v1
+          weight: 90
+        - destination:
+            host: backend
+            subset: v2
+          weight: 10

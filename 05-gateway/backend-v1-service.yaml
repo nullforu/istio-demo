@@ -1,0 +1,13 @@
+# Backend v1 Service (Gateway API용 - 버전별 분리)
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-v1
+  namespace: istio-demo
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: backend
+    version: v1

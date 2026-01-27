@@ -1,0 +1,35 @@
+# VirtualService - 헤더 기반 라우팅
+#
+# 설명:
+#   - x-version: v2 헤더가 있는 요청만 v2로 라우팅
+#   - 나머지 요청은 v1으로 라우팅
+#   - 특정 사용자 그룹(QA, Beta 테스터)만 새 버전 접근 가능
+#
+# 사용 사례:
+#   - Beta 테스트
+#   - QA 환경 분리
+#   - Feature Flag 대체
+#
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: backend-vs
+  namespace: istio-demo
+spec:
+  hosts:
+    - backend
+  http:
+    # 헤더 매칭 규칙 (우선순위 높음)
+    - match:
+        - headers:
+            x-version:
+              exact: "v2"
+      route:
+        - destination:
+            host: backend
+            subset: v2
+    # 기본 규칙 (매칭되지 않으면 v1)
+    - route:
+        - destination:
+            host: backend
+            subset: v1

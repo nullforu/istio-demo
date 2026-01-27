@@ -1,0 +1,20 @@
+# AuthorizationPolicy - 특정 서비스만 허용
+#
+# 설명:
+#   - sleep 서비스에서만 httpbin 접근 허용
+#   - principals: SPIFFE ID 기반 식별
+#
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-sleep-only
+  namespace: istio-demo
+spec:
+  selector:
+    matchLabels:
+      app: httpbin
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals: ["cluster.local/ns/istio-demo/sa/sleep"]

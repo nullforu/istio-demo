@@ -1,0 +1,22 @@
+# AuthorizationPolicy - 경로/메서드별 접근 제어
+#
+# 설명:
+#   - GET 메서드만 허용
+#   - /get, /headers, /ip 경로만 허용
+#   - 다른 메서드/경로는 차단
+#
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: path-based-policy
+  namespace: istio-demo
+spec:
+  selector:
+    matchLabels:
+      app: httpbin
+  action: ALLOW
+  rules:
+    - to:
+        - operation:
+            methods: ["GET"]
+            paths: ["/get", "/headers", "/ip"]

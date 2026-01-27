@@ -1,0 +1,53 @@
+# Sample Application - httpbin
+# Standard demo app for testing Service Mesh features
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: httpbin
+  namespace: istio-demo
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpbin
+  namespace: istio-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: httpbin
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: httpbin
+        version: v1
+    spec:
+      serviceAccountName: httpbin
+      containers:
+        - name: httpbin
+          image: docker.io/kennethreitz/httpbin
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpbin
+  namespace: istio-demo
+  labels:
+    app: httpbin
+spec:
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 80
+  selector:
+    app: httpbin
