@@ -1,0 +1,31 @@
+# HTTPRoute - Retry 설정
+#
+# 설명:
+#   - 5xx 에러 시 최대 3회 재시도
+#   - Gateway API + Istio 확장 지원
+#   - 일시적 오류 자동 복구
+#
+# 참고: retry는 Istio가 HTTPRoute를 확장하여 지원
+#       (표준 Gateway API에는 retry 필드 없음, Istio가 확장)
+#
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: httpbin-retry
+  namespace: istio-demo
+  annotations:
+    # Istio 확장: retry 설정
+    retry.istio.io/attempts: "3"
+    retry.istio.io/perTryTimeout: "1s"
+    retry.istio.io/retryOn: "5xx"
+spec:
+  parentRefs:
+    - name: httpbin
+      kind: Service
+      group: ""
+  rules:
+    - backendRefs:
+        - name: httpbin
+          port: 8000
+      timeouts:
+        request: 5s  # 전체 요청 타임아웃 (재시도 포함)

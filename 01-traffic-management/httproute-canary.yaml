@@ -1,0 +1,32 @@
+# HTTPRoute - Canary 배포 (가중치 기반 라우팅)
+#
+# 설명:
+#   - 90%의 트래픽은 backend-v1으로, 10%는 backend-v2로 라우팅
+#   - Gateway API 표준 방식 (VirtualService 대체)
+#   - weight 값을 조정하여 점진적으로 v2 비율 증가 가능
+#
+# 사용 사례:
+#   - Canary 배포
+#   - A/B 테스트
+#   - 점진적 롤아웃
+#
+# 참고: Gateway API는 Service를 직접 참조 (DestinationRule subset 불필요)
+#
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: backend-canary
+  namespace: istio-demo
+spec:
+  parentRefs:
+    - name: backend         # 대상 서비스 이름 (mesh 내부 트래픽)
+      kind: Service
+      group: ""
+  rules:
+    - backendRefs:
+        - name: backend-v1
+          port: 8080
+          weight: 90
+        - name: backend-v2
+          port: 8080
+          weight: 10

@@ -1,0 +1,35 @@
+# HTTPRoute - 헤더 기반 라우팅
+#
+# 설명:
+#   - x-version: v2 헤더가 있는 요청만 backend-v2로 라우팅
+#   - 나머지 요청은 backend-v1으로 라우팅
+#   - Gateway API 표준 방식 (VirtualService 대체)
+#
+# 사용 사례:
+#   - Beta 테스트
+#   - QA 환경 분리
+#   - Feature Flag 대체
+#
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: backend-header
+  namespace: istio-demo
+spec:
+  parentRefs:
+    - name: backend
+      kind: Service
+      group: ""
+  rules:
+    # 헤더 매칭 규칙 (우선순위 높음)
+    - matches:
+        - headers:
+            - name: x-version
+              value: v2
+      backendRefs:
+        - name: backend-v2
+          port: 8080
+    # 기본 규칙 (매칭되지 않으면 v1)
+    - backendRefs:
+        - name: backend-v1
+          port: 8080

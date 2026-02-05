@@ -1,0 +1,23 @@
+# HTTPRoute - Timeout 설정
+#
+# 설명:
+#   - 2초 내에 응답이 없으면 504 Gateway Timeout 반환
+#   - Gateway API 표준 방식 (VirtualService 대체)
+#   - 느린 서비스로 인한 연쇄 장애 방지
+#
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: httpbin-timeout
+  namespace: istio-demo
+spec:
+  parentRefs:
+    - name: httpbin
+      kind: Service
+      group: ""
+  rules:
+    - backendRefs:
+        - name: httpbin
+          port: 8000
+      timeouts:
+        request: 2s
